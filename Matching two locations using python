@@ -1,0 +1,22 @@
+from math import radians, cos, sin, sqrt
+
+def distance(lat1, lon1, lat2, lon2):
+    R = 6371  # radius of the earth in km
+    dLat = radians(lat2 - lat1)
+    dLon = radians(lon2 - lon1)
+    a = sin(dLat/2) * sin(dLat/2) + cos(radians(lat1)) \
+        * cos(radians(lat2)) * sin(dLon/2) * sin(dLon/2)
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    d = R * c  # distance in km
+    return d
+
+# Example usage
+lat1 = 37.7749
+lon1 = -122.4194
+lat2 = 40.7128
+lon2 = -74.0060
+threshold = 100  # distance threshold in km
+if distance(lat1, lon1, lat2, lon2) <= threshold:
+    print("The two locations match!")
+else:
+    print("The two locations do not match.")

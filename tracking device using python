@@ -1,0 +1,33 @@
+import requests
+
+# Replace <API_KEY> with your Google Maps API key
+API_KEY = "<API_KEY>"
+
+def get_location(ip_address):
+    url = f"https://www.googleapis.com/geolocation/v1/geolocate?key={API_KEY}"
+    data = {
+        "considerIp": False,
+        "wifiAccessPoints": [],
+        "cellTowers": [],
+        "homeMobileCountryCode": 310,
+        "homeMobileNetworkCode": 410,
+        "radioType": "gsm",
+        "carrier": "Vodafone",
+        "cellId": 42,
+        "locationAreaCode": 415,
+        "addressAge": 0,
+        "fallbacks": {
+            "lacf": False,
+            "ipBased": {
+                "ip": ip_address
+            }
+        }
+    }
+    response = requests.post(url, json=data)
+    location = response.json().get("location")
+    return location
+
+# Replace <IP_ADDRESS> with the IP address of the device you want to track
+ip_address = "<IP_ADDRESS>"
+location = get_location(ip_address)
+print(location)

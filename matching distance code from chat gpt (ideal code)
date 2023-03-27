@@ -1,0 +1,28 @@
+from math import radians, sin, cos, sqrt, atan2
+
+def distance(lat1, lon1, lat2, lon2):
+    # approximate radius of earth in meters
+    R = 6371000
+
+    # convert decimal degrees to radians
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+
+    # Haversine formula to calculate great-circle distance between two points
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    d = R * c
+
+    return d
+
+# Example usage
+lat1 = 37.7749
+lon1 = -122.4194
+lat2 = 37.77495
+lon2 = -122.41945
+threshold = 5  # distance threshold in meters
+if distance(lat1, lon1, lat2, lon2) <= threshold:
+    print("The two locations match!")
+else:
+    print("The two locations do not match.")

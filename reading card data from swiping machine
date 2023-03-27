@@ -1,0 +1,41 @@
+import javax.smartcardio.*;
+
+public class CardReader {
+    public static void main(String[] args) {
+        try {
+            // get the default terminal factory
+            TerminalFactory factory = TerminalFactory.getDefault();
+            
+            // get the list of available terminals
+            List<CardTerminal> terminals = factory.terminals().list();
+            
+            // select the first available terminal
+            CardTerminal terminal = terminals.get(0);
+            
+            // establish a connection to the card
+            Card card = terminal.connect("*");
+            
+            // get the basic channel
+            CardChannel channel = card.getBasicChannel();
+            
+            // send a command to read data from the card
+            byte[] command = { (byte) 0xFF, (byte) 0xCA, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
+            ResponseAPDU response = channel.transmit(new CommandAPDU(command));
+            
+            // check the response status
+            if (response.getSW() == 0x9000) {
+                // read the response data
+                byte[] data = response.getData();
+                String cardData = new String(data);
+                System.out.println("Card data: " + cardData);
+            } else {
+                System.out.println("Error reading card data.");
+            }
+            
+            // disconnect from the card
+            card.disconnect(true);
+        } catch (CardException e) {
+            System.out.println("Card error: " + e.getMessage());
+        }
+    }
+}

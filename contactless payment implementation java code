@@ -1,0 +1,56 @@
+import javax.smartcardio.*;
+
+public class ContactlessPayment {
+    public static void main(String[] args) {
+        try {
+            // get the default terminal factory
+            TerminalFactory factory = TerminalFactory.getDefault();
+            
+            // get the list of available terminals
+            List<CardTerminal> terminals = factory.terminals().list();
+            
+            // select the first available terminal
+            CardTerminal terminal = terminals.get(0);
+            
+            // establish a connection to the card
+            Card card = terminal.connect("*");
+            
+            // get the basic channel
+            CardChannel channel = card.getBasicChannel();
+            
+            // send a command to initialize the payment process
+            byte[] command = { (byte) 0x00, (byte) 0xA4, (byte) 0x04, (byte) 0x00, (byte) 0x09, (byte) 0xA0, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x04, (byte) 0x10, (byte) 0x10, (byte) 0x00 };
+            ResponseAPDU response = channel.transmit(new CommandAPDU(command));
+            
+            // check the response status
+            if (response.getSW() == 0x9000) {
+                // send a command to start the transaction
+                command = new byte[] { (byte) 0x80, (byte) 0x50, (byte) 0x00, (byte) 0x02, (byte) 0x00 };
+                response = channel.transmit(new CommandAPDU(command));
+                
+                // check the response status
+                if (response.getSW() == 0x9000) {
+                    // send a command to complete the transaction
+                    command = new byte[] { (byte) 0x80, (byte) 0x52, (byte) 0x00, (byte) 0x00, (byte) 0x08, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01 };
+                    response = channel.transmit(new CommandAPDU(command));
+                    
+                    // check the response status
+                    if (response.getSW() == 0x9000) {
+                        System.out.println("Transaction successful.");
+                    } else {
+                        System.out.println("Transaction failed.");
+                    }
+                } else {
+                    System.out.println("Failed to start transaction.");
+                }
+            } else {
+                System.out.println("Failed to initialize payment process.");
+            }
+            
+            // disconnect from the card
+            card.disconnect(true);
+        } catch (CardException e) {
+            System.out.println("Card error: " + e.getMessage());
+        }
+    }
+}
